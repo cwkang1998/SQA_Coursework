@@ -1,20 +1,15 @@
 # All jobs here are testing using openjdk10, no oracle jdk used since
 # most are deprecated
-jobs:
-  include:
-    - os: linux
-      language: java
-      jdk: openjdk10
-      script: chmod +x ./gradlew && ./gradlew build
-    - os: osx
-      language: java
-      jdk: openjdk10
-      script: chmod +x ./gradlew && ./gradlew build
-    # Windows does not support java, thus we customize our script
-    # Windows allows download of jdk8, so we can test on it
-    - os: windows
-      language: shell
-      script: sh win_gradle_setuprun.sh
+
+language: java
+
+jdk: openjdk10
+
+os:
+  - osx
+  - linux
+
+script: chmod +x ./gradlew && ./gradlew build
 
 install: true
 
