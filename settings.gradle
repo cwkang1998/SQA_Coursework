@@ -1,0 +1,3 @@
+
+rootProject.name = 'coursework'
+include ':chat-server' ,':chat-server'
