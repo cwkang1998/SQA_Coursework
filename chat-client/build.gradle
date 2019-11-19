@@ -7,9 +7,10 @@ dependencies {
     implementation 'com.google.guava:guava:26.0-jre'
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+    testImplementation "org.testfx:testfx-junit:4.0.16-alpha"
 }
 
-mainClassName = ''
+mainClassName = 'chat.client.Client'
 
 jar {
     manifest {
