@@ -8,6 +8,7 @@ public class Runner
 	
 	public static void main(String[] args){
 		server = new Server(PORT);
+		server.listen();
 	}
 	
 	
