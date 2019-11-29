@@ -1,6 +1,8 @@
 package g53sqm.chat.server;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -10,21 +12,62 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ServerTest {
 
+    private Server server;
+    private int serverPort;
+    private Thread serverThread;
+
+    @Before
+    public void setupServer() {
+        server = new Server(0);
+        serverPort = server.getServerPort();
+        serverThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Start Server Thread.");
+                server.listen();
+            }
+        });
+        // Start the thread as daemon so it would stop when JVM stop
+        serverThread.setDaemon(true);
+        serverThread.start();
+
+        // Let it sleep for 1 second to ensure thread executed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void isListening_ServerCreated_ReturnsFalse() {
-        Server server = new Server(10001);
+        Server server = new Server(0);
         assertFalse(server.isListening());
         server.stopListening();
     }
 
     @Test
     public void isListening_ServerStartAndStop_ReturnsCorrectState() {
-        Server server = new Server(10002);
-        Thread thread = runServerInThread(server);
+        Server server = new Server(0);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Start Server Thread.");
+                server.listen();
+            }
+        });
+        // Start the thread as daemon so it would stop when JVM stop
+        thread.setDaemon(true);
+        thread.start();
+
         // Let it sleep for 1 second to ensure thread executed
         try {
             Thread.sleep(1000);
@@ -45,20 +88,15 @@ public class ServerTest {
 
     @Test
     public void getUserList_NoUsersConnected_ReturnsEmptyList() {
-        Server server = new Server(10003);
-        Thread thread = runServerInThread(server);
         ArrayList<String> actual = server.getUserList();
-
         assertArrayEquals(new String[]{}, actual.toArray());
     }
 
     @Test
     public void getUserList_2UsersConnected_ReturnsListWithCorrectUsernames() {
-        Server server = new Server(10004);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10004);
-        Socket user2 = createMockUsers("user2", 10004);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         String[] expected = new String[]{"user1", "user2"};
         ArrayList<String> actual = server.getUserList();
@@ -70,7 +108,6 @@ public class ServerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.stopListening();
 
         assertEquals(expected[0], actual.get(0));
         assertEquals(expected[1], actual.get(1));
@@ -79,11 +116,9 @@ public class ServerTest {
 
     @Test
     public void getUserList_ConnectedUsersQuit_ReturnsCorrectList() {
-        Server server = new Server(10005);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10005);
-        Socket user2 = createMockUsers("user2", 10005);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         // user1 quit
         userSendMessage(user1, "QUIT");
@@ -104,16 +139,13 @@ public class ServerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.stopListening();
     }
 
     @Test
     public void getUserList_ConnectedUsersDisconnected_ReturnsCorrectList() {
-        Server server = new Server(10006);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10006);
-        Socket user2 = createMockUsers("user2", 10006);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         // Close user1 connection
         try {
@@ -133,31 +165,24 @@ public class ServerTest {
         }
         actual = server.getUserList();
         assertArrayEquals(new String[]{}, actual.toArray());
-
-        server.stopListening();
     }
 
     @Test
     public void getNumberOfUsers_NoUsersConnected_ReturnsZero() {
-        Server server = new Server(10007);
         int numberOfUsers = server.getNumberOfUsers();
         assertEquals(0, numberOfUsers);
-        server.stopListening();
     }
 
     @Test
     public void getNumberOfUsers_3UsersConnected_Returns3() {
-        Server server = new Server(10008);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10008);
-        Socket user2 = createMockUsers("user2", 10008);
-        Socket user3 = createMockUsers("user3", 10008);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
+        Socket user3 = createMockUsers("user3", serverPort);
 
         int numberOfUsers = server.getNumberOfUsers();
         assertEquals(3, numberOfUsers);
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -170,11 +195,9 @@ public class ServerTest {
 
     @Test
     public void getNumberOfUsers_ConnectedUsersQuit_ReturnsCorrectNumber() {
-        Server server = new Server(10009);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10009);
-        Socket user2 = createMockUsers("user2", 10009);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         // user1 quit
         userSendMessage(user1, "QUIT");
@@ -184,7 +207,6 @@ public class ServerTest {
         userSendMessage(user2, "QUIT");
         assertEquals(0, server.getNumberOfUsers());
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -196,11 +218,9 @@ public class ServerTest {
 
     @Test
     public void getNumberOfUsers_ConnectedUsersDisconnected_ReturnsCorrectNumber() {
-        Server server = new Server(10010);
-        Thread thread = runServerInThread(server);
         // Create users
-        Socket user1 = createMockUsers("user1", 10010);
-        Socket user2 = createMockUsers("user2", 10010);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         // Close user1 connection
         try {
@@ -217,32 +237,22 @@ public class ServerTest {
             e.printStackTrace();
         }
         assertEquals(0, server.getNumberOfUsers());
-
-        server.stopListening();
     }
 
     @Test
     public void doesUserExists_NoUserExists_ReturnsFalse() {
-        Server server = new Server(10011);
-        Thread thread = runServerInThread(server);
-
         // Test a random name
         boolean gotUser = server.doesUserExist("someName");
         assertFalse(gotUser);
-
-        server.stopListening();
     }
 
     @Test
     public void doesUserExists_UserExists_ReturnsTrue() {
-        Server server = new Server(10012);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("existingUser", 10012);
+        Socket user1 = createMockUsers("existingUser", serverPort);
 
         boolean gotUser = server.doesUserExist("existingUser");
         assertTrue(gotUser);
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -253,10 +263,8 @@ public class ServerTest {
 
     @Test
     public void doesUserExists_MultipleUsersExists_ReturnsTrue() {
-        Server server = new Server(10013);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("existingUser", 10013);
-        Socket user2 = createMockUsers("existingUser2", 10013);
+        Socket user1 = createMockUsers("existingUser", serverPort);
+        Socket user2 = createMockUsers("existingUser2", serverPort);
 
         boolean gotUser = server.doesUserExist("existingUser");
         boolean gotUser2 = server.doesUserExist("existingUser2");
@@ -275,10 +283,8 @@ public class ServerTest {
 
     @Test
     public void doesUserExists_MultipleUsersConnectAndQuit_ReturnsCorrectBoolean() {
-        Server server = new Server(10014);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("existingUser", 10014);
-        Socket user2 = createMockUsers("existingUser2", 10014);
+        Socket user1 = createMockUsers("existingUser", serverPort);
+        Socket user2 = createMockUsers("existingUser2", serverPort);
 
         boolean gotUser = server.doesUserExist("existingUser");
         boolean gotUser2 = server.doesUserExist("existingUser2");
@@ -297,7 +303,6 @@ public class ServerTest {
         assertFalse(gotUser);
         assertFalse(gotUser2);
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -309,10 +314,8 @@ public class ServerTest {
 
     @Test
     public void doesUserExists_MultipleUsersConnectAndDisconnect_ReturnsCorrectBoolean() {
-        Server server = new Server(10015);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("existingUser", 10015);
-        Socket user2 = createMockUsers("existingUser2", 10015);
+        Socket user1 = createMockUsers("existingUser", serverPort);
+        Socket user2 = createMockUsers("existingUser2", serverPort);
 
         boolean gotUser = server.doesUserExist("existingUser");
         boolean gotUser2 = server.doesUserExist("existingUser2");
@@ -340,15 +343,11 @@ public class ServerTest {
         gotUser2 = server.doesUserExist("existingUser2");
         assertFalse(gotUser);
         assertFalse(gotUser2);
-
-        server.stopListening();
     }
 
     @Test
     public void broadcastMessage_SingleUserSingleMessage_UserReceivesMessage() {
-        Server server = new Server(10016);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user1", 10016);
+        Socket user = createMockUsers("user1", serverPort);
         userWaitForMessage(user); // Clean first line of buffer, the login message
 
         String msg = "Hello!";
@@ -357,7 +356,6 @@ public class ServerTest {
 
         assertEquals(msg, actual);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -368,9 +366,7 @@ public class ServerTest {
 
     @Test
     public void broadcastMessage_SingleUserMultipleMessages_UserReceivesMultipleMessages() {
-        Server server = new Server(10017);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user1", 10017);
+        Socket user = createMockUsers("user1", serverPort);
         userWaitForMessage(user); // Clean first line of buffer, the login message
 
         String msg1 = "Hello!";
@@ -383,7 +379,6 @@ public class ServerTest {
         assertEquals(msg1, actual1);
         assertEquals(msg2, actual2);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -394,10 +389,8 @@ public class ServerTest {
 
     @Test
     public void broadcastMessage_MultipleUsers_UsersReceiveMessage() {
-        Server server = new Server(10018);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("user1", 10018);
-        Socket user2 = createMockUsers("user2", 10018);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
         // Clean first line of buffer, the login message
         userWaitForMessage(user1);
         userWaitForMessage(user2);
@@ -410,7 +403,6 @@ public class ServerTest {
         assertEquals(msg, actualUser1);
         assertEquals(msg, actualUser2);
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -422,9 +414,7 @@ public class ServerTest {
 
     @Test
     public void sendPrivateMessage_SingleUserCorrectUsername_UserReceivesMessage() {
-        Server server = new Server(10019);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10019);
+        Socket user = createMockUsers("user", serverPort);
         userWaitForMessage(user); // Clean first line of buffer, the login message
 
         String msg = "Hello!";
@@ -433,7 +423,6 @@ public class ServerTest {
 
         assertEquals(msg, actual);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -444,9 +433,7 @@ public class ServerTest {
 
     @Test
     public void sendPrivateMessage_SingleUserIncorrectUsername_UserReceivesMessage() {
-        Server server = new Server(10020);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10020);
+        Socket user = createMockUsers("user", serverPort);
         userWaitForMessage(user); // Clean first line of buffer, the login message
 
         String msg = "Hello!";
@@ -456,7 +443,6 @@ public class ServerTest {
 
         assertNotEquals(msg, actual);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -467,9 +453,7 @@ public class ServerTest {
 
     @Test
     public void sendPrivateMessage_SingleUserMultipleMessages_UserReceivesMessage() {
-        Server server = new Server(10021);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10021);
+        Socket user = createMockUsers("user", serverPort);
         userWaitForMessage(user); // Clean first line of buffer, the login message
 
         String msg = "Hello!";
@@ -482,7 +466,6 @@ public class ServerTest {
         assertEquals(msg, actual1);
         assertEquals(msg2, actual2);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -493,10 +476,8 @@ public class ServerTest {
 
     @Test
     public void sendPrivateMessage_MultipleUsers_OnlySpecifiedUserReceivesMessage() {
-        Server server = new Server(10022);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("user1", 10022);
-        Socket user2 = createMockUsers("user2", 10022);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
         // Clean first line of buffer, the login message
         userWaitForMessage(user1);
         userWaitForMessage(user2);
@@ -519,7 +500,6 @@ public class ServerTest {
         assertNotEquals(msg, actualUser1);
         assertEquals(msg, actualUser2);
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -531,16 +511,13 @@ public class ServerTest {
 
     @Test
     public void removeDeadUser_OnlineUser_UserNotRemoved() {
-        Server server = new Server(10023);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10023);
+        Socket user = createMockUsers("user", serverPort);
         int noUsers = server.getNumberOfUsers();
 
         server.removeDeadUsers();
         int noUsersAfterRemove = server.getNumberOfUsers();
         assertEquals(noUsers, noUsersAfterRemove);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -551,9 +528,7 @@ public class ServerTest {
 
     @Test
     public void removeDeadUser_QuitDeadUser_UserRemoved() {
-        Server server = new Server(10023);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10023);
+        Socket user = createMockUsers("user", serverPort);
 
         // user quit
         userSendMessage(user, "QUIT");
@@ -562,7 +537,6 @@ public class ServerTest {
 
         assertEquals(0, noUsersAfterRemove);
 
-        server.stopListening();
         // Close user connection
         try {
             user.close();
@@ -573,9 +547,7 @@ public class ServerTest {
 
     @Test
     public void removeDeadUser_DisconnectedDeadUser_UserRemoved() {
-        Server server = new Server(10024);
-        Thread thread = runServerInThread(server);
-        Socket user = createMockUsers("user", 10024);
+        Socket user = createMockUsers("user", serverPort);
 
         // Close user connection
         try {
@@ -587,16 +559,12 @@ public class ServerTest {
         int noUsersAfterRemove = server.getNumberOfUsers();
 
         assertEquals(0, noUsersAfterRemove);
-
-        server.stopListening();
     }
 
     @Test
     public void removeDeadUser_OneQuitFromMultipleUser_OneUserRemoved() {
-        Server server = new Server(10025);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("user1", 10025);
-        Socket user2 = createMockUsers("user2", 10025);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
         // user1 quit
         userSendMessage(user1, "QUIT");
@@ -605,7 +573,6 @@ public class ServerTest {
         assertEquals(1, server.getNumberOfUsers());
         assertEquals("user2", server.getUserList().get(0));
 
-        server.stopListening();
         // Close user connection
         try {
             user1.close();
@@ -617,12 +584,10 @@ public class ServerTest {
 
     @Test
     public void removeDeadUser_OneDisconnectFromMultipleUser_OneUserRemoved() {
-        Server server = new Server(10026);
-        Thread thread = runServerInThread(server);
-        Socket user1 = createMockUsers("user1", 10026);
-        Socket user2 = createMockUsers("user2", 10026);
+        Socket user1 = createMockUsers("user1", serverPort);
+        Socket user2 = createMockUsers("user2", serverPort);
 
-        // Close user connection
+        // Close user1 connection
         try {
             user1.close();
         } catch (IOException e) {
@@ -633,8 +598,7 @@ public class ServerTest {
         assertEquals(1, server.getNumberOfUsers());
         assertEquals("user2", server.getUserList().get(0));
 
-        server.stopListening();
-        // Close user connection
+        // Close user2 connection
         try {
             user2.close();
         } catch (IOException e) {
@@ -642,25 +606,9 @@ public class ServerTest {
         }
     }
 
-    /**
-     * Run the given server on a new thread
-     *
-     * @param serverInstance the given server instance
-     * @return thread with running server instance in it
-     */
-    private static Thread runServerInThread(Server serverInstance) {
-        Thread serverThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Start Server Thread.");
-                serverInstance.listen();
-            }
-        });
-        // Start the thread as daemon so it would stop when JVM stop
-        serverThread.setDaemon(true);
-        serverThread.start();
-
-        return serverThread;
+    @After
+    public void stopServer() {
+        server.stopListening();
     }
 
     /**

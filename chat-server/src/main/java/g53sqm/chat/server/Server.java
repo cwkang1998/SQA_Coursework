@@ -14,7 +14,7 @@ public class Server {
     public Server(int port) {
         try {
             server = new ServerSocket(port);
-            System.out.println("Server has been initialised on port " + port);
+            System.out.println("Server has been initialised on port " + server.getLocalPort());
         } catch (IOException e) {
             System.err.println("error initialising server");
             e.printStackTrace();
@@ -30,7 +30,7 @@ public class Server {
                 try {
                     c = new Connection(server.accept(), this);
                 } catch (IOException e) {
-                    System.err.println("error setting up new client conneciton");
+                    System.err.println("error setting up new client connection.");
                     e.printStackTrace();
                 }
                 Thread t = new Thread(c);
@@ -100,6 +100,10 @@ public class Server {
 
     public boolean isListening() {
         return isListening;
+    }
+
+    public int getServerPort() {
+        return server.getLocalPort();
     }
 
     protected void finalize() throws IOException {
