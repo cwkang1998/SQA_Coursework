@@ -20,7 +20,6 @@ public class Server {
             e.printStackTrace();
         }
         list = new ArrayList<Connection>();
-
     }
 
     public void listen() {
@@ -97,6 +96,10 @@ public class Server {
 
     public int getNumberOfUsers() {
         return list.size();
+    }
+
+    public boolean isListening() {
+        return isListening;
     }
 
     protected void finalize() throws IOException {
