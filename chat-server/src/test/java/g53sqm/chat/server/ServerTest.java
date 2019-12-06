@@ -101,14 +101,6 @@ public class ServerTest {
         String[] expected = new String[]{"user1", "user2"};
         ArrayList<String> actual = server.getUserList();
 
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         assertEquals(expected[0], actual.get(0));
         assertEquals(expected[1], actual.get(1));
         assertArrayEquals(expected, actual.toArray());
@@ -130,15 +122,6 @@ public class ServerTest {
         userSendMessage(user2, "QUIT");
         actual = server.getUserList();
         assertArrayEquals(new String[]{}, actual.toArray());
-
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -182,15 +165,6 @@ public class ServerTest {
 
         int numberOfUsers = server.getNumberOfUsers();
         assertEquals(3, numberOfUsers);
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-            user3.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -206,14 +180,6 @@ public class ServerTest {
         // user2 quit
         userSendMessage(user2, "QUIT");
         assertEquals(0, server.getNumberOfUsers());
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -252,13 +218,6 @@ public class ServerTest {
 
         boolean gotUser = server.doesUserExist("existingUser");
         assertTrue(gotUser);
-
-        // Close user connection
-        try {
-            user1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -270,15 +229,6 @@ public class ServerTest {
         boolean gotUser2 = server.doesUserExist("existingUser2");
         assertTrue(gotUser);
         assertTrue(gotUser2);
-
-        server.stopListening();
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -302,14 +252,6 @@ public class ServerTest {
         gotUser2 = server.doesUserExist("existingUser2");
         assertFalse(gotUser);
         assertFalse(gotUser2);
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -355,13 +297,6 @@ public class ServerTest {
         String actual = userWaitForMessage(user);
 
         assertEquals(msg, actual);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -378,13 +313,6 @@ public class ServerTest {
 
         assertEquals(msg1, actual1);
         assertEquals(msg2, actual2);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -402,14 +330,6 @@ public class ServerTest {
 
         assertEquals(msg, actualUser1);
         assertEquals(msg, actualUser2);
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -422,13 +342,6 @@ public class ServerTest {
         String actual = userWaitForMessage(user);
 
         assertEquals(msg, actual);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -442,13 +355,6 @@ public class ServerTest {
         String actual = userWaitForMessage(user);
 
         assertNotEquals(msg, actual);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -465,13 +371,6 @@ public class ServerTest {
 
         assertEquals(msg, actual1);
         assertEquals(msg2, actual2);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -499,14 +398,6 @@ public class ServerTest {
 
         assertNotEquals(msg, actualUser1);
         assertEquals(msg, actualUser2);
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -517,13 +408,6 @@ public class ServerTest {
         server.removeDeadUsers();
         int noUsersAfterRemove = server.getNumberOfUsers();
         assertEquals(noUsers, noUsersAfterRemove);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -536,13 +420,6 @@ public class ServerTest {
         int noUsersAfterRemove = server.getNumberOfUsers();
 
         assertEquals(0, noUsersAfterRemove);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -572,14 +449,6 @@ public class ServerTest {
         server.removeDeadUsers();
         assertEquals(1, server.getNumberOfUsers());
         assertEquals("user2", server.getUserList().get(0));
-
-        // Close user connection
-        try {
-            user1.close();
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test

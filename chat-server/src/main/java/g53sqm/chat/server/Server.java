@@ -9,7 +9,7 @@ public class Server {
 
     private ServerSocket server;
     private ArrayList<Connection> list;
-    private boolean isListening;
+    protected boolean isListening;
 
     public Server(int port) {
         try {
