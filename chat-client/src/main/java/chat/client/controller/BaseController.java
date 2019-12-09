@@ -11,19 +11,19 @@ public class BaseController {
     protected ChatService chatService;
     protected SceneManager manager;
 
-    protected void registerChatService(ChatService chatService) {
+    public void registerChatService(ChatService chatService) {
         this.chatService = chatService;
     }
 
-    protected void unregisterChatService() {
+    public void unregisterChatService() {
         this.chatService = null;
     }
 
-    protected void registerSceneManager(SceneManager manager) {
+    public void registerSceneManager(SceneManager manager) {
         this.manager = manager;
     }
 
-    protected void unregisterSceneManager() {
+    public void unregisterSceneManager() {
         this.manager = null;
     }
 }

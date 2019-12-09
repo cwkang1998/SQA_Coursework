@@ -1,4 +1,4 @@
 package chat.client.controller;
 
-public class MainChatController {
+public class MainChatController extends BaseController {
 }
