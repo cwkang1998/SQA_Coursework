@@ -90,6 +90,11 @@ public class ChatService implements Runnable {
         return this.state;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+
     /**
      * Run method.
      * Constantly listens for any new messages from the server and

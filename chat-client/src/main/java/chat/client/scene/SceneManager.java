@@ -42,9 +42,15 @@ public class SceneManager {
         }
 
         // Initialize Controller
-        BaseController controller = loginLoader.getController();
-        controller.registerSceneManager(this);
-        controller.registerChatService(chatService);
+        BaseController loginController = loginLoader.getController();
+        loginController.registerSceneManager(this);
+        loginController.registerChatService(chatService);
+        BaseController mainChatController = mainChatLoader.getController();
+        mainChatController.registerSceneManager(this);
+        mainChatController.registerChatService(chatService);
+        BaseController privateChatController = privateChatLoader.getController();
+        privateChatController.registerSceneManager(this);
+        privateChatController.registerChatService(chatService);
     }
 
     /**
