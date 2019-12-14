@@ -44,7 +44,7 @@ public class Connection implements Runnable {
                 line = in.readLine();
                 if (line != null) {
                     validateMessage(line);
-                }else{
+                } else {
                     running = false;
                 }
 
@@ -53,6 +53,9 @@ public class Connection implements Runnable {
                 running = false;
                 System.exit(-1);
             }
+        }
+        if (!running) {
+            serverReference.removeDeadUsers();
         }
     }
 

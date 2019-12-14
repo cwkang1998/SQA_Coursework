@@ -8,7 +8,7 @@ import java.util.Iterator;
 public class Server {
 
     private ServerSocket server;
-    private ArrayList<Connection> list;
+    private volatile ArrayList<Connection> list;
     protected boolean isListening;
 
     public Server(int port) {
@@ -35,7 +35,9 @@ public class Server {
                 }
                 Thread t = new Thread(c);
                 t.start();
-                this.list.add(c);
+                synchronized (this) {
+                    this.list.add(c);
+                }
             }
         }
     }
@@ -57,13 +59,14 @@ public class Server {
     }
 
     public boolean doesUserExist(String newUser) {
-        boolean result = false;
         for (Connection clientThread : list) {
             if (clientThread.getState() == Connection.STATE_REGISTERED) {
-                result = clientThread.getUserName().compareTo(newUser) == 0;
+                if (clientThread.getUserName().equals(newUser)) {
+                    return true;
+                }
             }
         }
-        return result;
+        return false;
     }
 
     public void broadcastMessage(String theMessage) {
@@ -85,16 +88,17 @@ public class Server {
         return false;
     }
 
-    public void removeDeadUsers() {
+    public synchronized void removeDeadUsers() {
         Iterator<Connection> it = list.iterator();
         while (it.hasNext()) {
             Connection c = it.next();
-            if (!c.isRunning())
+            if (c != null && !c.isRunning())
                 it.remove();
         }
     }
 
     public int getNumberOfUsers() {
+        this.removeDeadUsers();
         return list.size();
     }
 
