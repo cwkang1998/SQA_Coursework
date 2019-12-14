@@ -419,7 +419,7 @@ public class ConnectionTest {
         assertEquals(expectedMsg, actualMsg);
 
         socketSendMessage(socket, "HAIL " + msg2);
-        expectedMsg = "Broadcast from " + username + ": " + msg;
+        expectedMsg = "Broadcast from " + username + ": " + msg2;
         actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
