@@ -46,7 +46,8 @@ public class Server {
         this.isListening = false;
     }
 
-    public ArrayList<String> getUserList() {
+    public synchronized ArrayList<String> getUserList() {
+        this.removeDeadUsers();
         ArrayList<String> userList = new ArrayList<String>();
         Iterator<Connection> it = list.iterator();
         while (it.hasNext()) {
@@ -59,6 +60,7 @@ public class Server {
     }
 
     public synchronized boolean doesUserExist(String newUser) {
+        this.removeDeadUsers();
         for (Connection clientThread : list) {
             if (clientThread.getState() == Connection.STATE_REGISTERED) {
                 if (clientThread.getUserName().equals(newUser)) {
@@ -97,7 +99,7 @@ public class Server {
         }
     }
 
-    public int getNumberOfUsers() {
+    public synchronized int getNumberOfUsers() {
         this.removeDeadUsers();
         return list.size();
     }

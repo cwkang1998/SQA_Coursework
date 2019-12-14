@@ -45,16 +45,22 @@ public class Connection implements Runnable {
                 if (line != null) {
                     validateMessage(line);
                 } else {
-                    running = false;
+                    synchronized (this) {
+                        running = false;
+                    }
                 }
 
             } catch (IOException e) {
                 System.out.println("Read failed");
-                running = false;
+                synchronized (this) {
+                    running = false;
+                }
             }
         }
-        if (!running) {
-            serverReference.removeDeadUsers();
+        synchronized (this) {
+            if (!running) {
+                serverReference.removeDeadUsers();
+            }
         }
     }
 
@@ -201,7 +207,7 @@ public class Connection implements Runnable {
         }
     }
 
-    private void quit() {
+    private synchronized void quit() {
         switch (state) {
             case STATE_REGISTERED:
                 sendOverConnection("OK thank you for sending " + messageCount + " message(s) with the chat service, goodbye. ");
