@@ -44,10 +44,13 @@ public class Connection implements Runnable {
                 line = in.readLine();
                 if (line != null) {
                     validateMessage(line);
+                }else{
+                    running = false;
                 }
 
             } catch (IOException e) {
                 System.out.println("Read failed");
+                running = false;
                 System.exit(-1);
             }
         }
@@ -216,7 +219,6 @@ public class Connection implements Runnable {
     public String getUserName() {
         return username;
     }
-
 }
 
 	
