@@ -48,7 +48,7 @@ public class ConnectionTest {
         Socket socket = createNewConnection(serverPort);
         Connection connection = connectionList.get(0);
         assertTrue(connection.isRunning());
-        String expectedMsg = "OK Welcome to the chat server, there are currently 1 user(s) online";
+        String expectedMsg = "OK CONNECT Welcome to the chat server, there are currently 1 user(s) online";
         String msg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, msg);
     }
@@ -154,8 +154,8 @@ public class ConnectionTest {
     public void validateMessage_InvalidCommand_SendsBackErrorMessage() {
         Socket socket = createNewConnection(serverPort);
 
-        String shortErrMsg = "BAD invalid command to server";
-        String longErrMsg = "BAD command not recognised";
+        String shortErrMsg = "BAD VALD invalid command to server";
+        String longErrMsg = "BAD VALD command not recognised";
         String actualMsg = "";
 
         // Clear first welcome message
@@ -188,7 +188,7 @@ public class ConnectionTest {
         // Clear first welcome message
         waitAndRetrieveNextMessage(socket);
 
-        String expectedMsg = "BAD command not recognised";
+        String expectedMsg = "BAD VALD command not recognised";
         socketSendMessage(socket, "IDEN");
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
@@ -200,7 +200,7 @@ public class ConnectionTest {
         // Clear first welcome message
         waitAndRetrieveNextMessage(socket);
 
-        String expectedMsg = "BAD command not recognised";
+        String expectedMsg = "BAD VALD command not recognised";
         socketSendMessage(socket, "IDEN    ");
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
@@ -213,7 +213,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         String username = "user1";
-        String expectedMsg = "OK Welcome to the chat server " + username;
+        String expectedMsg = "OK IDEN Welcome to the chat server " + username;
         socketSendMessage(socket, "IDEN " + username);
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
@@ -228,7 +228,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket2);
 
         String username = "user1";
-        String expectedMsg = "BAD username is already taken";
+        String expectedMsg = "BAD IDEN username is already taken";
         socketSendMessage(socket1, "IDEN " + username);
         socketSendMessage(socket2, "IDEN " + username);
         String actualMsg = waitAndRetrieveNextMessage(socket2);
@@ -246,7 +246,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket3);
 
         String username = "user1";
-        String expectedMsg = "BAD username is already taken";
+        String expectedMsg = "BAD IDEN username is already taken";
         socketSendMessage(socket1, "IDEN " + username);
         socketSendMessage(socket2, "IDEN " + username);
         socketSendMessage(socket3, "IDEN " + username);
@@ -268,7 +268,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         String username = "user1";
-        String expectedMsg = "BAD you are already registered with username " + username;
+        String expectedMsg = "BAD IDEN you are already registered with username " + username;
 
         // Register and Remove first welcome message
         socketSendMessage(socket, "IDEN " + username);
@@ -286,7 +286,7 @@ public class ConnectionTest {
         // Clear first welcome message
         waitAndRetrieveNextMessage(socket);
 
-        String expectedMsg = "OK There are currently 1 user(s) on the server You have not logged in yet";
+        String expectedMsg = "OK STAT There are currently 1 user(s) on the server You have not logged in yet";
         socketSendMessage(socket, "STAT");
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
@@ -301,7 +301,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "STAT");
-        String expectedMsg = "OK There are currently 1 user(s) on the server You are logged in and have sent 0 message(s)";
+        String expectedMsg = "OK STAT There are currently 1 user(s) on the server You are logged in and have sent 0 message(s)";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -316,7 +316,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "STAT");
-        String expectedMsg = "OK There are currently 1 user(s) on the server You are logged in and have sent 1 message(s)";
+        String expectedMsg = "OK STAT There are currently 1 user(s) on the server You are logged in and have sent 1 message(s)";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -329,7 +329,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "LIST");
-        String expectedMsg = "BAD You have not logged in yet";
+        String expectedMsg = "BAD LIST You have not logged in yet";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -344,7 +344,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "LIST");
-        String expectedMsg = "OK " + username + ", ";
+        String expectedMsg = "OK LIST " + username + ", ";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -364,7 +364,7 @@ public class ConnectionTest {
 
         socketSendMessage(socket1, "LIST");
         socketSendMessage(socket2, "LIST");
-        String expectedMsg = "OK " + username1 + ", " + username2 + ", ";
+        String expectedMsg = "OK LIST " + username1 + ", " + username2 + ", ";
         String actualMsg = waitAndRetrieveNextMessage(socket1);
         assertEquals(expectedMsg, actualMsg);
         actualMsg = waitAndRetrieveNextMessage(socket2);
@@ -380,7 +380,7 @@ public class ConnectionTest {
 
         String msg = "Testing";
         socketSendMessage(socket, "HAIL " + msg);
-        String expectedMsg = "BAD You have not logged in yet";
+        String expectedMsg = "BAD HAIL You have not logged in yet";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -412,7 +412,7 @@ public class ConnectionTest {
 
         String msg = "";
         socketSendMessage(socket, "HAIL " + msg);
-        String expectedMsg = "BAD command not recognised";
+        String expectedMsg = "BAD VALD command not recognised";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -484,7 +484,7 @@ public class ConnectionTest {
 
         String msg = "Testing";
         socketSendMessage(socket2, "MESG " + targetUsername + " " + msg);
-        String expectedMsg = "BAD You have not logged in yet";
+        String expectedMsg = "BAD MESG You have not logged in yet";
         String actualMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -503,7 +503,7 @@ public class ConnectionTest {
 
         String msg = "Testing";
         socketSendMessage(socket1, "MESG " + fakeUsername + " " + msg);
-        String expectedMsg = "BAD the user does not exist";
+        String expectedMsg = "BAD MESG the user does not exist";
         String actualMsg = waitAndRetrieveNextMessage(socket1);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -523,7 +523,7 @@ public class ConnectionTest {
 
         String msg = "Testing";
         socketSendMessage(socket2, "MESG " + targetUsername + msg);
-        String expectedSenderMsg = "BAD Your message is badly formatted";
+        String expectedSenderMsg = "BAD MESG Your message is badly formatted";
         String actualSenderMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedSenderMsg, actualSenderMsg);
     }
@@ -544,7 +544,7 @@ public class ConnectionTest {
         String msg = "Testing";
         socketSendMessage(socket2, "MESG " + targetUsername + " " + msg);
         String expectedReceiverMsg = "PM from " + senderUsername + ":" + msg;
-        String expectedSenderMsg = "OK your message has been sent";
+        String expectedSenderMsg = "OK MESG your message has been sent";
         String actualReceiverMsg = waitAndRetrieveNextMessage(socket1);
         String actualSenderMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedReceiverMsg, actualReceiverMsg);
@@ -566,7 +566,7 @@ public class ConnectionTest {
 
         String msg = "";
         socketSendMessage(socket2, "MESG " + msg);
-        String expectedSenderMsg = "BAD command not recognised";
+        String expectedSenderMsg = "BAD VALD command not recognised";
         String actualSenderMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedSenderMsg, actualSenderMsg);
     }
@@ -579,7 +579,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "QUIT");
-        String expectedMsg = "OK goodbye";
+        String expectedMsg = "OK QUIT goodbye";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }
@@ -594,7 +594,7 @@ public class ConnectionTest {
         waitAndRetrieveNextMessage(socket);
 
         socketSendMessage(socket, "QUIT");
-        String expectedMsg = "OK thank you for sending 0 message(s) with the chat service, goodbye. ";
+        String expectedMsg = "OK QUIT thank you for sending 0 message(s) with the chat service, goodbye. ";
         String actualMsg = waitAndRetrieveNextMessage(socket);
         assertEquals(expectedMsg, actualMsg);
     }

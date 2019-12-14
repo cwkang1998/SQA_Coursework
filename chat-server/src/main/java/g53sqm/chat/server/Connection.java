@@ -38,7 +38,7 @@ public class Connection implements Runnable {
             System.exit(-1);
         }
         running = true;
-        this.sendOverConnection("OK Welcome to the chat server, there are currently " + serverReference.getNumberOfUsers() + " user(s) online");
+        this.sendOverConnection("OK CONNECT Welcome to the chat server, there are currently " + serverReference.getNumberOfUsers() + " user(s) online");
         while (running) {
             try {
                 line = in.readLine();
@@ -60,7 +60,7 @@ public class Connection implements Runnable {
 
     private void validateMessage(String message) {
         if (message.length() < 4) {
-            sendOverConnection("BAD invalid command to server");
+            sendOverConnection("BAD VALD invalid command to server");
         } else {
             String trimmed = message.trim();
             switch (message.substring(0, 4)) {
@@ -80,7 +80,7 @@ public class Connection implements Runnable {
                     if (trimmed.length() >= 5) {
                         iden(trimmed.substring(5));
                     } else {
-                        sendOverConnection("BAD command not recognised");
+                        sendOverConnection("BAD VALD command not recognised");
                     }
                     break;
 
@@ -88,7 +88,7 @@ public class Connection implements Runnable {
                     if (trimmed.length() >= 5) {
                         hail(trimmed.substring(5));
                     } else {
-                        sendOverConnection("BAD command not recognised");
+                        sendOverConnection("BAD VALD command not recognised");
                     }
                     break;
 
@@ -96,12 +96,12 @@ public class Connection implements Runnable {
                     if (trimmed.length() >= 5) {
                         mesg(trimmed.substring(5));
                     } else {
-                        sendOverConnection("BAD command not recognised");
+                        sendOverConnection("BAD VALD command not recognised");
                     }
                     break;
 
                 default:
-                    sendOverConnection("BAD command not recognised");
+                    sendOverConnection("BAD VALD command not recognised");
                     break;
             }
         }
@@ -119,7 +119,7 @@ public class Connection implements Runnable {
                 status += "You have not logged in yet";
                 break;
         }
-        sendOverConnection("OK " + status);
+        sendOverConnection("OK STAT " + status);
     }
 
     private void list() {
@@ -130,11 +130,11 @@ public class Connection implements Runnable {
                 for (String s : userList) {
                     userListString += s + ", ";
                 }
-                sendOverConnection("OK " + userListString);
+                sendOverConnection("OK LIST " + userListString);
                 break;
 
             case STATE_UNREGISTERED:
-                sendOverConnection("BAD You have not logged in yet");
+                sendOverConnection("BAD LIST You have not logged in yet");
                 break;
         }
 
@@ -143,17 +143,17 @@ public class Connection implements Runnable {
     private void iden(String message) {
         switch (state) {
             case STATE_REGISTERED:
-                sendOverConnection("BAD you are already registered with username " + username);
+                sendOverConnection("BAD IDEN you are already registered with username " + username);
                 break;
 
             case STATE_UNREGISTERED:
                 String username = message.split(" ")[0];
                 if (serverReference.doesUserExist(username)) {
-                    sendOverConnection("BAD username is already taken");
+                    sendOverConnection("BAD IDEN username is already taken");
                 } else {
                     this.username = username;
                     state = STATE_REGISTERED;
-                    sendOverConnection("OK Welcome to the chat server " + username);
+                    sendOverConnection("OK IDEN Welcome to the chat server " + username);
                 }
                 break;
         }
@@ -167,7 +167,7 @@ public class Connection implements Runnable {
                 break;
 
             case STATE_UNREGISTERED:
-                sendOverConnection("BAD You have not logged in yet");
+                sendOverConnection("BAD HAIL You have not logged in yet");
                 break;
         }
     }
@@ -186,17 +186,17 @@ public class Connection implements Runnable {
                     String user = message.substring(0, messageStart);
                     String pm = message.substring(messageStart + 1);
                     if (serverReference.sendPrivateMessage("PM from " + username + ":" + pm, user)) {
-                        sendOverConnection("OK your message has been sent");
+                        sendOverConnection("OK MESG your message has been sent");
                     } else {
-                        sendOverConnection("BAD the user does not exist");
+                        sendOverConnection("BAD MESG the user does not exist");
                     }
                 } else {
-                    sendOverConnection("BAD Your message is badly formatted");
+                    sendOverConnection("BAD MESG Your message is badly formatted");
                 }
                 break;
 
             case STATE_UNREGISTERED:
-                sendOverConnection("BAD You have not logged in yet");
+                sendOverConnection("BAD MESG You have not logged in yet");
                 break;
         }
     }
@@ -204,10 +204,10 @@ public class Connection implements Runnable {
     private void quit() {
         switch (state) {
             case STATE_REGISTERED:
-                sendOverConnection("OK thank you for sending " + messageCount + " message(s) with the chat service, goodbye. ");
+                sendOverConnection("OK QUIT thank you for sending " + messageCount + " message(s) with the chat service, goodbye. ");
                 break;
             case STATE_UNREGISTERED:
-                sendOverConnection("OK goodbye");
+                sendOverConnection("OK QUIT goodbye");
                 break;
         }
         running = false;
