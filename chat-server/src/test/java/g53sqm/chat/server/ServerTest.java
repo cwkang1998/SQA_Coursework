@@ -125,32 +125,6 @@ public class ServerTest {
     }
 
     @Test
-    public void getUserList_ConnectedUsersDisconnected_ReturnsCorrectList() {
-        // Create users
-        Socket user1 = createMockUsers("user1", serverPort);
-        Socket user2 = createMockUsers("user2", serverPort);
-
-        // Close user1 connection
-        try {
-            user1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ArrayList<String> actual = server.getUserList();
-        assertEquals("user2", actual.get(0));
-        assertArrayEquals(new String[]{"user2"}, actual.toArray());
-
-        // Close user2 connection
-        try {
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        actual = server.getUserList();
-        assertArrayEquals(new String[]{}, actual.toArray());
-    }
-
-    @Test
     public void getNumberOfUsers_NoUsersConnected_ReturnsZero() {
         int numberOfUsers = server.getNumberOfUsers();
         assertEquals(0, numberOfUsers);
@@ -179,29 +153,6 @@ public class ServerTest {
 
         // user2 quit
         userSendMessage(user2, "QUIT");
-        assertEquals(0, server.getNumberOfUsers());
-    }
-
-    @Test
-    public void getNumberOfUsers_ConnectedUsersDisconnected_ReturnsCorrectNumber() {
-        // Create users
-        Socket user1 = createMockUsers("user1", serverPort);
-        Socket user2 = createMockUsers("user2", serverPort);
-
-        // Close user1 connection
-        try {
-            user1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        assertEquals(1, server.getNumberOfUsers());
-
-        // Close user2 connection
-        try {
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         assertEquals(0, server.getNumberOfUsers());
     }
 
@@ -248,39 +199,6 @@ public class ServerTest {
         assertTrue(gotUser2);
 
         userSendMessage(user2, "QUIT");
-        gotUser = server.doesUserExist("existingUser");
-        gotUser2 = server.doesUserExist("existingUser2");
-        assertFalse(gotUser);
-        assertFalse(gotUser2);
-    }
-
-    @Test
-    public void doesUserExists_MultipleUsersConnectAndDisconnect_ReturnsCorrectBoolean() {
-        Socket user1 = createMockUsers("existingUser", serverPort);
-        Socket user2 = createMockUsers("existingUser2", serverPort);
-
-        boolean gotUser = server.doesUserExist("existingUser");
-        boolean gotUser2 = server.doesUserExist("existingUser2");
-        assertTrue(gotUser);
-        assertTrue(gotUser2);
-
-        // Close user1 connection
-        try {
-            user1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        gotUser = server.doesUserExist("existingUser");
-        gotUser2 = server.doesUserExist("existingUser2");
-        assertFalse(gotUser);
-        assertTrue(gotUser2);
-
-        // Close user2 connection
-        try {
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         gotUser = server.doesUserExist("existingUser");
         gotUser2 = server.doesUserExist("existingUser2");
         assertFalse(gotUser);
@@ -423,22 +341,6 @@ public class ServerTest {
     }
 
     @Test
-    public void removeDeadUser_DisconnectedDeadUser_UserRemoved() {
-        Socket user = createMockUsers("user", serverPort);
-
-        // Close user connection
-        try {
-            user.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        server.removeDeadUsers();
-        int noUsersAfterRemove = server.getNumberOfUsers();
-
-        assertEquals(0, noUsersAfterRemove);
-    }
-
-    @Test
     public void removeDeadUser_OneQuitFromMultipleUser_OneUserRemoved() {
         Socket user1 = createMockUsers("user1", serverPort);
         Socket user2 = createMockUsers("user2", serverPort);
@@ -449,30 +351,6 @@ public class ServerTest {
         server.removeDeadUsers();
         assertEquals(1, server.getNumberOfUsers());
         assertEquals("user2", server.getUserList().get(0));
-    }
-
-    @Test
-    public void removeDeadUser_OneDisconnectFromMultipleUser_OneUserRemoved() {
-        Socket user1 = createMockUsers("user1", serverPort);
-        Socket user2 = createMockUsers("user2", serverPort);
-
-        // Close user1 connection
-        try {
-            user1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        server.removeDeadUsers();
-        assertEquals(1, server.getNumberOfUsers());
-        assertEquals("user2", server.getUserList().get(0));
-
-        // Close user2 connection
-        try {
-            user2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @After

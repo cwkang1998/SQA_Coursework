@@ -58,7 +58,7 @@ public class Server {
         return userList;
     }
 
-    public synchronized boolean doesUserExist(String newUser) {
+    public boolean doesUserExist(String newUser) {
         for (Connection clientThread : list) {
             if (clientThread.getState() == Connection.STATE_REGISTERED) {
                 if (clientThread.getUserName().equals(newUser)) {
@@ -98,7 +98,6 @@ public class Server {
     }
 
     public int getNumberOfUsers() {
-        this.removeDeadUsers();
         return list.size();
     }
 
