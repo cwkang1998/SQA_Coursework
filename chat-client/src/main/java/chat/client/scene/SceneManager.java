@@ -2,6 +2,7 @@ package chat.client.scene;
 
 import chat.client.controller.BaseController;
 import chat.client.services.ChatService;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -13,16 +14,20 @@ public class SceneManager {
     private Stage primaryStage;
     private ChatService chatService;
     private ArrayList<Scene> scenes;
+    private ArrayList<BaseController> controllers;
     private ArrayList<Stage> openedWindows;
     private String defaultSceneName;
+    private String currentSceneName;
 
     public SceneManager(Stage stage, ChatService chatService) {
         this.primaryStage = stage;
         this.chatService = chatService;
         this.scenes = new ArrayList<>();
+        this.controllers = new ArrayList<>();
         this.openedWindows = new ArrayList<>();
         initialize();
         this.defaultSceneName = "Login";
+        this.currentSceneName = this.defaultSceneName;
         primaryStage.setTitle(defaultSceneName);
         primaryStage.setScene(this.getDefaultScene());
     }
@@ -43,14 +48,16 @@ public class SceneManager {
 
         // Initialize Controller
         BaseController loginController = loginLoader.getController();
-        loginController.registerSceneManager(this);
-        loginController.registerChatService(chatService);
         BaseController mainChatController = mainChatLoader.getController();
-        mainChatController.registerSceneManager(this);
-        mainChatController.registerChatService(chatService);
         BaseController privateChatController = privateChatLoader.getController();
-        privateChatController.registerSceneManager(this);
-        privateChatController.registerChatService(chatService);
+        controllers.add(loginController);
+        controllers.add(mainChatController);
+        controllers.add(privateChatController);
+
+        for (BaseController controller : controllers) {
+            controller.registerSceneManager(this);
+            controller.registerChatService(chatService);
+        }
     }
 
     /**
@@ -60,7 +67,7 @@ public class SceneManager {
      * @return The scene object corresponding to the sceneName provided,
      * if the corresponding scene object does not exists, return null instead
      */
-    public Scene getSceneByName(String sceneName) {
+    private Scene getSceneByName(String sceneName) {
         switch (sceneName) {
             case "Login":
                 return scenes.get(0);
@@ -74,23 +81,46 @@ public class SceneManager {
 
     public void navigateToScene(String sceneName) {
         Scene scene = getSceneByName(sceneName);
-        primaryStage.setScene(scene);
+        if (scene != null) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    primaryStage.setTitle(sceneName);
+                    primaryStage.setScene(scene);
+                }
+            });
+        }
     }
 
     public void startNewWindow(String sceneName, String title) {
         Stage stage = new Stage();
-        stage.setTitle(title);
         Scene scene = getSceneByName(sceneName);
-        stage.setScene(scene);
-        openedWindows.add(stage);
-        stage.show();
+        if (scene != null) {
+            stage.setScene(scene);
+            stage.setTitle(currentSceneName);
+            openedWindows.add(stage);
+            stage.show();
+        }
     }
 
-    public Scene getDefaultScene() {
+    private Scene getDefaultScene() {
         return getSceneByName(defaultSceneName);
     }
 
     public void setDefaultScene(String defaultSceneName) {
         this.defaultSceneName = defaultSceneName;
+    }
+
+    public String getCurrentSceneName() {
+        return currentSceneName;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        for (BaseController controller : controllers) {
+            controller.unregisterChatService();
+            controller.unregisterSceneManager();
+        }
     }
 }

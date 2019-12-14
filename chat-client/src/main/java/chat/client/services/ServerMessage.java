@@ -3,16 +3,21 @@ package chat.client.services;
 public class ServerMessage {
 
     public enum MessageStatus {
-        OK("OK"), BAD("BAD"), NONE("NONE");
+        OK("OK"), BAD("BAD");
 
         MessageStatus(String status) {
         }
     }
 
     public enum MessageType {
-        SERVER("SERVER"), BROADCAST("BROADCAST"), PM("PM");
+        // Request response
+        CONNECT("CONNECT"), VALD("VALD"), IDEN("IDEN"), HAIL("HAIL"), MESG("MESG"),
+        LIST("LIST"), STAT("STAT"), QUIT("QUIT"),
 
-        MessageType(String broadcast) {
+        // User message response
+        BROADCAST("BROADCAST"), PM("PM");
+
+        MessageType(String type) {
         }
     }
 
@@ -37,12 +42,12 @@ public class ServerMessage {
         if (checkString.equals(MessageStatus.OK.toString()) || checkString.equals(MessageStatus.BAD.toString())) {
             String[] parsed = parseServerMessage(rawMsg);
             this.status = MessageStatus.valueOf(parsed[0]);
-            this.type = MessageType.SERVER;
-            this.sourceUsername = "";
-            this.msg = parsed[1];
+            this.type = MessageType.valueOf(parsed[1]);
+            this.sourceUsername = null;
+            this.msg = parsed[2];
         } else {
             String[] parsed = parseUserMessage(rawMsg);
-            this.status = MessageStatus.NONE;
+            this.status = MessageStatus.OK;
             this.type = MessageType.valueOf(parsed[0].toUpperCase());
             this.sourceUsername = parsed[1];
             this.msg = parsed[2];
@@ -59,7 +64,7 @@ public class ServerMessage {
      */
     private String[] parseServerMessage(String rawMsg) {
         rawMsg = rawMsg.trim();
-        return rawMsg.split(" ", 2);
+        return rawMsg.split(" ", 3);
     }
 
     /**

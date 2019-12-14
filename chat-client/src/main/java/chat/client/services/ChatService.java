@@ -14,38 +14,27 @@ public class ChatService implements Runnable {
     private Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
-    private ArrayList<MessageListener> listeners;
+    private ArrayList<ServerMessageListener> listeners;
     private String username;
     private boolean isAlive;
     private Thread thread;
 
-    private enum State {
-        IDEN, LIST, STAT, BROADCAST, PM, QUIT, NONE
-    }
-
-    private volatile State state;
-
-    public ChatService(String hostname, int port) {
-        try {
-            socket = new Socket(hostname, port);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(socket.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ChatService(String hostname, int port) throws IOException {
+        socket = new Socket(hostname, port);
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        writer = new PrintWriter(socket.getOutputStream(), true);
         listeners = new ArrayList<>();
         username = "";
         isAlive = true;
-        state = State.NONE;
         thread = new Thread(this);
         thread.start();
     }
 
-    public void registerMessageListener(MessageListener messageListener) {
+    public void registerMessageListener(ServerMessageListener messageListener) {
         this.listeners.add(messageListener);
     }
 
-    public void unregisterMessageListener(MessageListener messageListener) {
+    public void unregisterMessageListener(ServerMessageListener messageListener) {
         this.listeners.remove(messageListener);
     }
 
@@ -53,41 +42,32 @@ public class ChatService implements Runnable {
         if (!username.isEmpty()) {
             this.username = username;
             this.writer.println("IDEN " + username);
-            this.state = State.IDEN;
         }
     }
 
     public void listAllUser() {
         this.writer.println("LIST");
-        this.state = State.LIST;
     }
 
     public void getUserStat() {
         this.writer.println("STAT");
-        this.state = State.STAT;
     }
 
     public void broadcastMsg(String msg) {
         this.writer.println("HAIL " + msg);
-        this.state = State.BROADCAST;
     }
 
     public void privateMsg(String username, String msg) {
         this.writer.println("MESG " + username + " " + msg);
-        this.state = State.PM;
     }
 
     public void quit() {
         this.writer.println("QUIT");
-        this.state = State.QUIT;
     }
 
     public void stopService() {
+        this.quit();
         this.isAlive = false;
-    }
-
-    public State getCurrentState() {
-        return this.state;
     }
 
     public String getUsername() {
@@ -114,21 +94,20 @@ public class ChatService implements Runnable {
                 e.printStackTrace();
             }
             if (serverMessage != null) {
-                for (MessageListener listener : listeners) {
-                    if (serverMessage.getType().equals(MessageType.SERVER)) {
+                for (ServerMessageListener listener : listeners) {
+                    MessageType type = serverMessage.getType();
+                    if (type.equals(MessageType.BROADCAST) || type.equals(MessageType.PM)) {
+                        listener.onIncomingMessage(serverMessage);
+                    }else {
                         if (serverMessage.getStatus() == MessageStatus.OK) {
-                            listener.onServerSuccessResponse(serverMessage.getMsg());
+                            listener.onServerSuccessResponse(serverMessage);
                         } else if (serverMessage.getStatus() == MessageStatus.BAD) {
-                            listener.onServerErrorResponse(serverMessage.getMsg());
+                            listener.onServerErrorResponse(serverMessage);
                         }
-                        this.state = state.NONE;
-                    } else if (serverMessage.getType().equals(MessageType.BROADCAST)) {
-                        listener.onBroadcastResponse(serverMessage.getSourceUsername(), serverMessage.getMsg());
-                    } else if (serverMessage.getType().equals(MessageType.PM)) {
-                        listener.onPMResponse(serverMessage.getSourceUsername(), serverMessage.getMsg());
                     }
                 }
             }
         }
     }
+
 }
