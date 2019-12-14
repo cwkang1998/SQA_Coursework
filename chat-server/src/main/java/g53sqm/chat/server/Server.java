@@ -58,7 +58,7 @@ public class Server {
         return userList;
     }
 
-    public boolean doesUserExist(String newUser) {
+    public synchronized boolean doesUserExist(String newUser) {
         for (Connection clientThread : list) {
             if (clientThread.getState() == Connection.STATE_REGISTERED) {
                 if (clientThread.getUserName().equals(newUser)) {

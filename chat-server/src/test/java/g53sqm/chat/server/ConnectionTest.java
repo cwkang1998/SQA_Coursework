@@ -182,30 +182,29 @@ public class ConnectionTest {
         assertEquals(longErrMsg, actualMsg);
     }
 
-//    @Test
-//    public void iden_NoUsername_ReturnsErrorMsg() {
-//        Socket socket = createNewConnection(serverPort);
-//        // Clear first welcome message
-//        waitAndRetrieveNextMessage(socket);
-//
-//        String expectedMsg = "BAD username not given";
-//        socketSendMessage(socket, "IDEN");
-//        String actualMsg = waitAndRetrieveNextMessage(socket);
-//        assertEquals(expectedMsg, actualMsg);
-//    }
-//
-//    @Test
-//    public void iden_EmptyUsername_ReturnsErrorMsg() {
-//        Socket socket = createNewConnection(serverPort);
-//        Connection connection = connectionList.get(0);
-//        // Clear first welcome message
-//        waitAndRetrieveNextMessage(socket);
-//
-//        String expectedMsg = "BAD username not given";
-//        socketSendMessage(socket, "IDEN    ");
-//        String actualMsg = waitAndRetrieveNextMessage(socket);
-//        assertEquals(expectedMsg, actualMsg);
-//    }
+    @Test
+    public void iden_NoUsername_ReturnsErrorMsg() {
+        Socket socket = createNewConnection(serverPort);
+        // Clear first welcome message
+        waitAndRetrieveNextMessage(socket);
+
+        String expectedMsg = "BAD command not recognised";
+        socketSendMessage(socket, "IDEN");
+        String actualMsg = waitAndRetrieveNextMessage(socket);
+        assertEquals(expectedMsg, actualMsg);
+    }
+
+    @Test
+    public void iden_EmptyUsername_ReturnsErrorMsg() {
+        Socket socket = createNewConnection(serverPort);
+        // Clear first welcome message
+        waitAndRetrieveNextMessage(socket);
+
+        String expectedMsg = "BAD command not recognised";
+        socketSendMessage(socket, "IDEN    ");
+        String actualMsg = waitAndRetrieveNextMessage(socket);
+        assertEquals(expectedMsg, actualMsg);
+    }
 
     @Test
     public void iden_UsernameGivenWhenUnregistered_ReturnsWelcomeMsg() {
@@ -403,6 +402,23 @@ public class ConnectionTest {
     }
 
     @Test
+    public void hail_OneRegisteredUserSendEmptyHailMsg_ReturnsErrorMsg() {
+        Socket socket = createNewConnection(serverPort);
+
+        // Clear welcome and iden msg
+        String username = "user1";
+        socketSendMessage(socket, "IDEN " + username);
+        waitAndRetrieveNextMessage(socket);
+
+        String msg = "";
+        socketSendMessage(socket, "HAIL " + msg);
+        String expectedMsg = "BAD command not recognised";
+        String actualMsg = waitAndRetrieveNextMessage(socket);
+        assertEquals(expectedMsg, actualMsg);
+    }
+
+
+    @Test
     public void hail_OneRegisteredUserSendMultipleHailMsg_ReturnsCorrectMsg() {
         Socket socket = createNewConnection(serverPort);
 
@@ -532,6 +548,26 @@ public class ConnectionTest {
         String actualReceiverMsg = waitAndRetrieveNextMessage(socket1);
         String actualSenderMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedReceiverMsg, actualReceiverMsg);
+        assertEquals(expectedSenderMsg, actualSenderMsg);
+    }
+
+    @Test
+    public void mesg_RegisteredUserSendEmptyPrivateMsgToExistingUser_ReturnsErrorMsg() {
+        Socket socket1 = createNewConnection(serverPort);
+        Socket socket2 = createNewConnection(serverPort);
+
+        // Clear welcome and iden msg
+        String targetUsername = "user1";
+        String senderUsername = "user2";
+        socketSendMessage(socket1, "IDEN " + targetUsername);
+        socketSendMessage(socket2, "IDEN " + senderUsername);
+        waitAndRetrieveNextMessage(socket1);
+        waitAndRetrieveNextMessage(socket2);
+
+        String msg = "";
+        socketSendMessage(socket2, "MESG " + msg);
+        String expectedSenderMsg = "BAD command not recognised";
+        String actualSenderMsg = waitAndRetrieveNextMessage(socket2);
         assertEquals(expectedSenderMsg, actualSenderMsg);
     }
 

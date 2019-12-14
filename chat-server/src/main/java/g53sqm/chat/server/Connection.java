@@ -63,6 +63,7 @@ public class Connection implements Runnable {
         if (message.length() < 4) {
             sendOverConnection("BAD invalid command to server");
         } else {
+            String trimmed = message.trim();
             switch (message.substring(0, 4)) {
                 case "LIST":
                     list();
@@ -72,20 +73,32 @@ public class Connection implements Runnable {
                     stat();
                     break;
 
+                case "QUIT":
+                    quit();
+                    break;
+
                 case "IDEN":
-                    iden(message.substring(5));
+                    if (trimmed.length() >= 5) {
+                        iden(trimmed.substring(5));
+                    } else {
+                        sendOverConnection("BAD command not recognised");
+                    }
                     break;
 
                 case "HAIL":
-                    hail(message.substring(5));
+                    if (trimmed.length() >= 5) {
+                        hail(trimmed.substring(5));
+                    } else {
+                        sendOverConnection("BAD command not recognised");
+                    }
                     break;
 
                 case "MESG":
-                    mesg(message.substring(5));
-                    break;
-
-                case "QUIT":
-                    quit();
+                    if (trimmed.length() >= 5) {
+                        mesg(trimmed.substring(5));
+                    } else {
+                        sendOverConnection("BAD command not recognised");
+                    }
                     break;
 
                 default:
