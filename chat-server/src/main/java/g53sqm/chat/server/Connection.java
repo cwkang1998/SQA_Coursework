@@ -51,7 +51,6 @@ public class Connection implements Runnable {
             } catch (IOException e) {
                 System.out.println("Read failed");
                 running = false;
-                System.exit(-1);
             }
         }
         if (!running) {
