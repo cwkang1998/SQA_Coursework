@@ -8,19 +8,18 @@ import java.util.Iterator;
 public class Server {
 
     private ServerSocket server;
-    private ArrayList<Connection> list;
-    private boolean isListening;
+    private volatile ArrayList<Connection> list;
+    protected boolean isListening;
 
     public Server(int port) {
         try {
             server = new ServerSocket(port);
-            System.out.println("Server has been initialised on port " + port);
+            System.out.println("Server has been initialised on port " + server.getLocalPort());
         } catch (IOException e) {
             System.err.println("error initialising server");
             e.printStackTrace();
         }
         list = new ArrayList<Connection>();
-
     }
 
     public void listen() {
@@ -31,12 +30,14 @@ public class Server {
                 try {
                     c = new Connection(server.accept(), this);
                 } catch (IOException e) {
-                    System.err.println("error setting up new client conneciton");
+                    System.err.println("error setting up new client connection.");
                     e.printStackTrace();
                 }
                 Thread t = new Thread(c);
                 t.start();
-                this.list.add(c);
+                synchronized (this) {
+                    this.list.add(c);
+                }
             }
         }
     }
@@ -58,13 +59,14 @@ public class Server {
     }
 
     public boolean doesUserExist(String newUser) {
-        boolean result = false;
         for (Connection clientThread : list) {
             if (clientThread.getState() == Connection.STATE_REGISTERED) {
-                result = clientThread.getUserName().compareTo(newUser) == 0;
+                if (clientThread.getUserName().equals(newUser)) {
+                    return true;
+                }
             }
         }
-        return result;
+        return false;
     }
 
     public void broadcastMessage(String theMessage) {
@@ -86,17 +88,25 @@ public class Server {
         return false;
     }
 
-    public void removeDeadUsers() {
+    public synchronized void removeDeadUsers() {
         Iterator<Connection> it = list.iterator();
         while (it.hasNext()) {
             Connection c = it.next();
-            if (!c.isRunning())
+            if (c != null && !c.isRunning())
                 it.remove();
         }
     }
 
     public int getNumberOfUsers() {
         return list.size();
+    }
+
+    public boolean isListening() {
+        return isListening;
+    }
+
+    public int getServerPort() {
+        return server.getLocalPort();
     }
 
     protected void finalize() throws IOException {
