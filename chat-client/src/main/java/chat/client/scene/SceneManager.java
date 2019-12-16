@@ -15,7 +15,6 @@ public class SceneManager {
     private ChatService chatService;
     private ArrayList<Scene> scenes;
     private ArrayList<BaseController> controllers;
-    private ArrayList<Stage> openedWindows;
     private String defaultSceneName;
     private String currentSceneName;
 
@@ -24,7 +23,6 @@ public class SceneManager {
         this.chatService = chatService;
         this.scenes = new ArrayList<>();
         this.controllers = new ArrayList<>();
-        this.openedWindows = new ArrayList<>();
         initialize();
         this.defaultSceneName = "Login";
         this.currentSceneName = this.defaultSceneName;
@@ -34,25 +32,21 @@ public class SceneManager {
 
     private void initialize() {
         FXMLLoader loginLoader = new FXMLLoader(getClass().getResource("/chat/client/Login.fxml"));
-        FXMLLoader mainChatLoader = new FXMLLoader(getClass().getResource("/chat/client/MainChat.fxml"));
-        FXMLLoader privateChatLoader = new FXMLLoader(getClass().getResource("/chat/client/PrivateChat.fxml"));
+        FXMLLoader ChatroomLoader = new FXMLLoader(getClass().getResource("/chat/client/Chatroom.fxml"));
 
         // Initialize Scenes
         try {
             scenes.add(new Scene(loginLoader.load()));
-            scenes.add(new Scene(mainChatLoader.load()));
-            scenes.add(new Scene(privateChatLoader.load()));
+            scenes.add(new Scene(ChatroomLoader.load()));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Initialize Controller
         BaseController loginController = loginLoader.getController();
-        BaseController mainChatController = mainChatLoader.getController();
-        BaseController privateChatController = privateChatLoader.getController();
+        BaseController chatroomController = ChatroomLoader.getController();
         controllers.add(loginController);
-        controllers.add(mainChatController);
-        controllers.add(privateChatController);
+        controllers.add(chatroomController);
 
         for (BaseController controller : controllers) {
             controller.registerSceneManager(this);
@@ -71,16 +65,15 @@ public class SceneManager {
         switch (sceneName) {
             case "Login":
                 return scenes.get(0);
-            case "MainChat":
+            case "Chatroom":
                 return scenes.get(1);
-            case "PrivateChat":
-                return scenes.get(2);
         }
         return null;
     }
 
     public void navigateToScene(String sceneName) {
         Scene scene = getSceneByName(sceneName);
+        currentSceneName = sceneName;
         if (scene != null) {
             Platform.runLater(new Runnable() {
                 @Override
@@ -92,27 +85,17 @@ public class SceneManager {
         }
     }
 
-    public void startNewWindow(String sceneName, String title) {
-        Stage stage = new Stage();
-        Scene scene = getSceneByName(sceneName);
-        if (scene != null) {
-            stage.setScene(scene);
-            stage.setTitle(currentSceneName);
-            openedWindows.add(stage);
-            stage.show();
-        }
-    }
-
     private Scene getDefaultScene() {
         return getSceneByName(defaultSceneName);
     }
 
-    public void setDefaultScene(String defaultSceneName) {
-        this.defaultSceneName = defaultSceneName;
-    }
+    public void setSceneTitleDescp(String titleDescp) {
+        if (titleDescp == null) {
+            primaryStage.setTitle(currentSceneName);
+        } else {
+            primaryStage.setTitle(currentSceneName + ": " + titleDescp);
+        }
 
-    public String getCurrentSceneName() {
-        return currentSceneName;
     }
 
     @Override

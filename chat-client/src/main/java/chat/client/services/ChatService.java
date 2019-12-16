@@ -58,6 +58,7 @@ public class ChatService implements Runnable {
     }
 
     public void privateMsg(String username, String msg) {
+        System.out.println("MESG " + username + " " + msg);
         this.writer.println("MESG " + username + " " + msg);
     }
 
@@ -98,7 +99,7 @@ public class ChatService implements Runnable {
                     MessageType type = serverMessage.getType();
                     if (type.equals(MessageType.BROADCAST) || type.equals(MessageType.PM)) {
                         listener.onIncomingMessage(serverMessage);
-                    }else {
+                    } else {
                         if (serverMessage.getStatus() == MessageStatus.OK) {
                             listener.onServerSuccessResponse(serverMessage);
                         } else if (serverMessage.getStatus() == MessageStatus.BAD) {

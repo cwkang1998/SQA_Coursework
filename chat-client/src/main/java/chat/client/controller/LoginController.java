@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 
 
@@ -32,16 +34,16 @@ public class LoginController extends BaseController {
         btnLogin.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                msgErrorLogin.setVisible(false);
-                String inputString = usernameInput.getText();
-                inputString = inputString.trim();
-                if (!inputString.isEmpty()) {
-                    chatService.registerUser(inputString);
-                } else {
-                    msgErrorLogin.setText("Username cannot be empty.");
-                    msgErrorLogin.setVisible(true);
+                handleLogin();
+            }
+        });
+        usernameInput.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER)) {
+                    handleLogin();
+                    event.consume();
                 }
-                usernameInput.setText("");
             }
         });
 
@@ -53,10 +55,23 @@ public class LoginController extends BaseController {
         });
     }
 
+    private void handleLogin() {
+        msgErrorLogin.setVisible(false);
+        String inputString = usernameInput.getText();
+        inputString = inputString.trim();
+        if (!inputString.isEmpty()) {
+            chatService.registerUser(inputString);
+        } else {
+            msgErrorLogin.setText("Username cannot be empty.");
+            msgErrorLogin.setVisible(true);
+        }
+        usernameInput.setText("");
+    }
+
     @Override
     public void onServerSuccessResponse(ServerMessage message) {
         if (message.getType().equals(MessageType.IDEN)) {
-            this.manager.navigateToScene("MainChat");
+            this.manager.navigateToScene("Chatroom");
         }
     }
 
