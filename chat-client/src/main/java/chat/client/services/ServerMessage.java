@@ -3,7 +3,7 @@ package chat.client.services;
 public class ServerMessage {
 
     public enum MessageStatus {
-        OK("OK"), BAD("BAD");
+        OK("OK"), BAD("BAD"), INVALID("INVALID");
 
         MessageStatus(String status) {
         }
@@ -39,18 +39,22 @@ public class ServerMessage {
         // They are of a server type message, otherwise user messages.
         String checkString = rawMsg.substring(0, 3);
         checkString = checkString.trim();
-        if (checkString.equals(MessageStatus.OK.toString()) || checkString.equals(MessageStatus.BAD.toString())) {
-            String[] parsed = parseServerMessage(rawMsg);
-            this.status = MessageStatus.valueOf(parsed[0]);
-            this.type = MessageType.valueOf(parsed[1]);
-            this.sourceUsername = null;
-            this.msg = parsed[2];
-        } else {
-            String[] parsed = parseUserMessage(rawMsg);
-            this.status = MessageStatus.OK;
-            this.type = MessageType.valueOf(parsed[0].toUpperCase());
-            this.sourceUsername = parsed[1];
-            this.msg = parsed[2];
+        try {
+            if (checkString.equals(MessageStatus.OK.toString()) || checkString.equals(MessageStatus.BAD.toString())) {
+                String[] parsed = parseServerMessage(rawMsg);
+                this.status = MessageStatus.valueOf(parsed[0]);
+                this.type = MessageType.valueOf(parsed[1]);
+                this.sourceUsername = null;
+                this.msg = parsed[2];
+            } else {
+                String[] parsed = parseUserMessage(rawMsg);
+                this.status = MessageStatus.OK;
+                this.type = MessageType.valueOf(parsed[0].toUpperCase());
+                this.sourceUsername = parsed[1];
+                this.msg = parsed[2];
+            }
+        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+            this.status = MessageStatus.INVALID;
         }
     }
 
@@ -82,7 +86,7 @@ public class ServerMessage {
         String[] msgTypeAndUser = userAndMsg[0].split(" ", 3);
         userMsgData[0] = msgTypeAndUser[0];
         userMsgData[1] = msgTypeAndUser[2];
-        userMsgData[2] = userAndMsg[1];
+        userMsgData[2] = userAndMsg[1].trim();
         return userMsgData;
     }
 
@@ -97,7 +101,6 @@ public class ServerMessage {
     public String getSourceUsername() {
         return sourceUsername;
     }
-
 
     public MessageType getType() {
         return type;
