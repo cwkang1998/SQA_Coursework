@@ -35,11 +35,7 @@ public class ChatServiceTest {
         serverThread.start();
 
         // Let it sleep for 1 second to ensure thread executed
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(1000);
         try {
             chatService = new ChatService(HOSTNAME, serverPort);
         } catch (IOException e) {
@@ -47,6 +43,7 @@ public class ChatServiceTest {
         }
         mockMessageListener = new MockMessageListener();
         chatService.registerMessageListener(mockMessageListener);
+        sleep(500);
     }
 
     @Test
