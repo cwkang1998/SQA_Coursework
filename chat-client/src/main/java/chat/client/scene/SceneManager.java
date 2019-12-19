@@ -27,7 +27,7 @@ public class SceneManager {
         this.defaultSceneName = "Login";
         this.currentSceneName = this.defaultSceneName;
         primaryStage.setTitle(defaultSceneName);
-        primaryStage.setScene(this.getDefaultScene());
+        primaryStage.setScene(getSceneByName(defaultSceneName));
     }
 
     private void initialize() {
@@ -85,17 +85,25 @@ public class SceneManager {
         }
     }
 
-    private Scene getDefaultScene() {
-        return getSceneByName(defaultSceneName);
-    }
+    public void setChatroomSceneTitleDescp(String titleDescp) {
+        if (currentSceneName.equals("Chatroom")) {
+            if (titleDescp == null) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        primaryStage.setTitle(currentSceneName);
+                    }
+                });
 
-    public void setSceneTitleDescp(String titleDescp) {
-        if (titleDescp == null) {
-            primaryStage.setTitle(currentSceneName);
-        } else {
-            primaryStage.setTitle(currentSceneName + ": " + titleDescp);
+            } else {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        primaryStage.setTitle(currentSceneName + ": " + titleDescp);
+                    }
+                });
+            }
         }
-
     }
 
     @Override

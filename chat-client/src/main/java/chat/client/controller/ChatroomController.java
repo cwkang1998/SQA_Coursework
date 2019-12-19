@@ -190,7 +190,7 @@ public class ChatroomController extends BaseController {
                 chatContacts.getChildren().add(0, publicRoomLink);
 
                 // Set the title desc to the chatroom you are in
-                manager.setSceneTitleDescp(currentChatroom);
+                manager.setChatroomSceneTitleDescp(currentChatroom);
             }
         });
     }
