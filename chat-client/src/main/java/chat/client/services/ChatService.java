@@ -58,7 +58,6 @@ public class ChatService implements Runnable {
     }
 
     public void privateMsg(String username, String msg) {
-        System.out.println("MESG " + username + " " + msg);
         this.writer.println("MESG " + username + " " + msg);
     }
 
@@ -73,6 +72,10 @@ public class ChatService implements Runnable {
 
     public String getUsername() {
         return username;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
     }
 
 

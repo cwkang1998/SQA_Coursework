@@ -1,4 +1,6 @@
 package chat.client.controller;
 
-public class ChatroomControllerTest {
+import org.testfx.framework.junit.ApplicationTest;
+
+public class ChatroomControllerTest extends ApplicationTest {
 }

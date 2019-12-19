@@ -3,7 +3,7 @@ package chat.client.services;
 public class ServerMessage {
 
     public enum MessageStatus {
-        OK("OK"), BAD("BAD"), INVALID("INVALID");
+        OK("OK"), BAD("BAD");
 
         MessageStatus(String status) {
         }
@@ -54,7 +54,10 @@ public class ServerMessage {
                 this.msg = parsed[2];
             }
         } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
-            this.status = MessageStatus.INVALID;
+            this.status = MessageStatus.BAD;
+            this.type = MessageType.VALD;
+            this.sourceUsername = null;
+            this.msg = "parsing error due to invalid message format.";
         }
     }
 

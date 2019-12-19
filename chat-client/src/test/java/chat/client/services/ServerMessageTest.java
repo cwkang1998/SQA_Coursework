@@ -8,31 +8,43 @@ import static org.junit.Assert.assertNull;
 public class ServerMessageTest {
 
     @Test
-    public void ServerMessage_InvalidMessageFormat_HaveInvalidStatus() {
+    public void ServerMessage_BadMessageFormat_HaveBadStatus() {
         String rawMsg = "WeirdBadlyFormatted Message";
         ServerMessage serverMessage = new ServerMessage(rawMsg);
-        assertEquals(serverMessage.getStatus(), ServerMessage.MessageStatus.INVALID);
+        assertEquals(ServerMessage.MessageStatus.BAD, serverMessage.getStatus());
+        assertEquals(ServerMessage.MessageType.VALD, serverMessage.getType());
+        assertNull(serverMessage.getSourceUsername());
+        assertEquals("parsing error due to invalid message format.", serverMessage.getMsg());
     }
 
     @Test
-    public void ServerMessage_InvalidMessageStatus_HaveInvalidStatus() {
+    public void ServerMessage_BadMessageStatus_HaveBadStatus() {
         String rawMsg = "STATUS CONNECT Message";
         ServerMessage serverMessage = new ServerMessage(rawMsg);
-        assertEquals(serverMessage.getStatus(), ServerMessage.MessageStatus.INVALID);
+        assertEquals(ServerMessage.MessageStatus.BAD, serverMessage.getStatus());
+        assertEquals(ServerMessage.MessageType.VALD, serverMessage.getType());
+        assertNull(serverMessage.getSourceUsername());
+        assertEquals("parsing error due to invalid message format.", serverMessage.getMsg());
     }
 
     @Test
-    public void ServerMessage_InvalidMessageType_HaveInvalidStatus() {
+    public void ServerMessage_BadMessageType_HaveBadStatus() {
         String rawMsg = "OK WEIRD Message";
         ServerMessage serverMessage = new ServerMessage(rawMsg);
-        assertEquals(serverMessage.getStatus(), ServerMessage.MessageStatus.INVALID);
+        assertEquals(ServerMessage.MessageStatus.BAD, serverMessage.getStatus());
+        assertEquals(ServerMessage.MessageType.VALD, serverMessage.getType());
+        assertNull(serverMessage.getSourceUsername());
+        assertEquals("parsing error due to invalid message format.", serverMessage.getMsg());
     }
 
     @Test
-    public void ServerMessage_EmptyMessage_HaveInvalidStatus() {
+    public void ServerMessage_EmptyMessage_HaveBadStatus() {
         String rawMsg = "OK WEIRD   ";
         ServerMessage serverMessage = new ServerMessage(rawMsg);
-        assertEquals(serverMessage.getStatus(), ServerMessage.MessageStatus.INVALID);
+        assertEquals(ServerMessage.MessageStatus.BAD, serverMessage.getStatus());
+        assertEquals(ServerMessage.MessageType.VALD, serverMessage.getType());
+        assertNull(serverMessage.getSourceUsername());
+        assertEquals("parsing error due to invalid message format.", serverMessage.getMsg());
     }
 
     @Test
