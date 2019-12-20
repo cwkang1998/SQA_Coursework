@@ -47,6 +47,7 @@ public class ChatroomController extends BaseController {
         currentChatroom = PUBLIC_CHAT_NAME;
         chatRoomContent = new HashMap<>(2);
         VBox publicChatBox = new VBox();
+        publicChatBox.setId("vbox_public_chat");
         publicChatBox.setPadding(new Insets(12, 12, 12, 12));
         chatRoomContent.put(PUBLIC_CHAT_NAME, publicChatBox);
         chatScroll.setContent(chatRoomContent.get(PUBLIC_CHAT_NAME));
@@ -140,6 +141,7 @@ public class ChatroomController extends BaseController {
         for (String user : users) {
             if (!user.isEmpty()) {
                 VBox chatBox = new VBox();
+                chatBox.setId("vbox_" + user);
                 chatBox.setPadding(new Insets(12, 12, 12, 12));
                 chatRoomContent.putIfAbsent(user, chatBox);
             }
