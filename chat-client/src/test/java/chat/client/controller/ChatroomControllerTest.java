@@ -62,7 +62,7 @@ public class ChatroomControllerTest extends ApplicationTest {
         serverThread.start();
 
         // Let it sleep for 1 second to ensure thread executed
-        WaitForAsyncUtils.sleep(2000, TimeUnit.MILLISECONDS);
+        WaitForAsyncUtils.sleep(1000, TimeUnit.MILLISECONDS);
         chatService = new ChatService(HOSTNAME, serverPort);
         Semaphore semaphore = new Semaphore(0);
         Platform.runLater(new Runnable() {
@@ -78,10 +78,9 @@ public class ChatroomControllerTest extends ApplicationTest {
             }
         });
         semaphore.acquire();
-
         // Capture all events that are queued as of now.
         WaitForAsyncUtils.waitForFxEvents();
-        WaitForAsyncUtils.sleep(5000, TimeUnit.MILLISECONDS);
+        WaitForAsyncUtils.sleep(1000, TimeUnit.MILLISECONDS);
 
         // Simulate server response
         mockServer.sendMessage("OK IDEN Welcome to the chat server " + username);

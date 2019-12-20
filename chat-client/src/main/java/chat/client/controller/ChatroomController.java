@@ -16,9 +16,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 
 public class ChatroomController extends BaseController {
@@ -129,11 +129,10 @@ public class ChatroomController extends BaseController {
         pollingThread.start();
     }
 
-    private synchronized void populateOnlineUsers(String[] users) {
-        if (users.length + 1 != chatRoomContent.size()) {
-            List<String> onlineCheckList = Arrays.asList(users);
+    private synchronized void populateOnlineUsers(ArrayList<String> users) {
+        if (users.size() + 1 != chatRoomContent.size()) {
             for (String currentUser : chatRoomContent.keySet()) {
-                if (!onlineCheckList.contains(currentUser) && !currentUser.equals(PUBLIC_CHAT_NAME)) {
+                if (!users.contains(currentUser) && !currentUser.equals(PUBLIC_CHAT_NAME)) {
                     chatRoomContent.remove(currentUser);
                 }
             }
@@ -207,11 +206,10 @@ public class ChatroomController extends BaseController {
             String[] users = message.getMsg().split(",");
             for (int i = 0; i < users.length; i++) {
                 users[i] = users[i].trim();
-                if (users[i].equals(chatService.getUsername())) {
-                    users[i] = "";
-                }
             }
-            populateOnlineUsers(users);
+            ArrayList<String> usersList = new ArrayList<String>(Arrays.asList(users));
+            usersList.remove(chatService.getUsername());
+            populateOnlineUsers(usersList);
         } else if (message.getType().equals(MessageType.QUIT)) {
             addChatMessages(currentChatroom, message.getMsg(), false);
             synchronized (this) {
