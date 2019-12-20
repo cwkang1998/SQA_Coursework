@@ -86,9 +86,6 @@ public class ChatroomControllerTest extends ApplicationTest {
         mockServer.sendMessage("OK IDEN Welcome to the chat server " + username);
         WaitForAsyncUtils.waitForFxEvents();
 
-        mockServer.sendMessage("OK LIST " + username + ", ");
-        WaitForAsyncUtils.waitForFxEvents();
-
         // Turn off the controller polling LIST, for isolated testing purposes
         try {
             Field field = SceneManager.class.getDeclaredField("controllers");
@@ -103,6 +100,9 @@ public class ChatroomControllerTest extends ApplicationTest {
         }
         WaitForAsyncUtils.waitForFxEvents();
         WaitForAsyncUtils.sleep(500, TimeUnit.MILLISECONDS);
+
+        mockServer.sendMessage("OK LIST " + username + ", ");
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     @Test

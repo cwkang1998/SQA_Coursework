@@ -35,11 +35,12 @@ public class ChatroomController extends BaseController {
     @FXML
     private TextArea msgTextArea;
 
-    private HashMap<String, VBox> chatRoomContent;
-    private boolean isPolling;
+    private volatile HashMap<String, VBox> chatRoomContent;
+    private volatile boolean isPolling;
+    private volatile String currentChatroom;
+
     private Thread pollingThread;
     private final String PUBLIC_CHAT_NAME = "Public Chatroom";
-    private String currentChatroom;
 
     @Override
     public void registerChatService(ChatService chatService) {
@@ -129,7 +130,7 @@ public class ChatroomController extends BaseController {
         pollingThread.start();
     }
 
-    private synchronized void populateOnlineUsers(ArrayList<String> users) {
+    private void populateOnlineUsers(ArrayList<String> users) {
         if (users.size() + 1 != chatRoomContent.size()) {
             for (String currentUser : chatRoomContent.keySet()) {
                 if (!users.contains(currentUser) && !currentUser.equals(PUBLIC_CHAT_NAME)) {
