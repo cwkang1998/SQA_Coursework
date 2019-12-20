@@ -86,18 +86,20 @@ public class ChatroomControllerTest extends ApplicationTest {
         mockServer.sendMessage("OK IDEN Welcome to the chat server " + username);
         WaitForAsyncUtils.waitForFxEvents();
 
+        // Simulate user login, since user login took long enough in setup even
+        Field field = ChatService.class.getDeclaredField("username");
+        field.setAccessible(true);
+        field.set(chatService, username);
+
         // Turn off the controller polling LIST, for isolated testing purposes
-        try {
-            Field field = SceneManager.class.getDeclaredField("controllers");
-            field.setAccessible(true);
-            ArrayList<BaseController> baseControllers = (ArrayList<BaseController>) field.get(sceneManager);
-            ChatroomController controller = (ChatroomController) baseControllers.get(1);
-            field = ChatroomController.class.getDeclaredField("isPolling");
-            field.setAccessible(true);
-            field.set(controller, false);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        field = SceneManager.class.getDeclaredField("controllers");
+        field.setAccessible(true);
+        ArrayList<BaseController> baseControllers = (ArrayList<BaseController>) field.get(sceneManager);
+        ChatroomController controller = (ChatroomController) baseControllers.get(1);
+        field = ChatroomController.class.getDeclaredField("isPolling");
+        field.setAccessible(true);
+        field.set(controller, false);
+
         WaitForAsyncUtils.waitForFxEvents();
         WaitForAsyncUtils.sleep(500, TimeUnit.MILLISECONDS);
 
