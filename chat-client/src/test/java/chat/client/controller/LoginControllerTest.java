@@ -9,7 +9,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,7 @@ import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.matcher.control.LabeledMatchers;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.awt.*;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.*;
@@ -29,7 +32,6 @@ public class LoginControllerTest extends ApplicationTest {
     private static final String HOSTNAME = "localhost";
     private MockServer mockServer;
     private Stage primaryStage;
-    private BaseController controller;
     private ChatService chatService;
     private SceneManager sceneManager;
     private int serverPort;
@@ -37,11 +39,7 @@ public class LoginControllerTest extends ApplicationTest {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(Client.class.getResource("/chat/client/Login.fxml"));
-        Parent mainNode = loader.load();
-        controller = loader.getController();
         primaryStage = stage;
-        stage.setScene(new Scene(mainNode));
         stage.show();
         stage.toFront();
     }
@@ -62,17 +60,22 @@ public class LoginControllerTest extends ApplicationTest {
         serverThread.start();
 
         // Let it sleep for 1 second to ensure thread executed
-        Thread.sleep(1000);
+        sleep(1000);
         chatService = new ChatService(HOSTNAME, serverPort);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 sceneManager = new SceneManager(primaryStage, chatService);
-                controller.registerChatService(chatService);
-                controller.registerSceneManager(sceneManager);
+                sceneManager.navigateToScene("Login");
             }
         });
         WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
+    public void errorMsgLabel_InitialLogin_IsNotVisible() {
+        Label errLabel = lookup("#msgErrorLogin").query();
+        assertFalse(errLabel.isVisible());
     }
 
     @Test
@@ -102,8 +105,6 @@ public class LoginControllerTest extends ApplicationTest {
     @After
     public void tearDown() throws TimeoutException {
         FxToolkit.hideStage();
-        controller.unregisterSceneManager();
-        controller.unregisterChatService();
         chatService.stopService();
         mockServer.stopListening();
     }

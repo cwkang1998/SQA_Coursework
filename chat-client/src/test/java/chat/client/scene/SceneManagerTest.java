@@ -1,18 +1,12 @@
 package chat.client.scene;
 
-import chat.client.Client;
 import chat.client.mocks.MockServer;
 import chat.client.services.ChatService;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.testfx.api.FxAssert;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
@@ -34,6 +28,8 @@ public class SceneManagerTest extends ApplicationTest {
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
+        primaryStage.show();
+        primaryStage.toFront();
     }
 
     @Before
@@ -58,7 +54,6 @@ public class SceneManagerTest extends ApplicationTest {
             @Override
             public void run() {
                 sceneManager = new SceneManager(primaryStage, chatService);
-                primaryStage.show();
             }
         });
         WaitForAsyncUtils.waitForFxEvents();
