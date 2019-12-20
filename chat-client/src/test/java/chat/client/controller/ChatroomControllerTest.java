@@ -1,6 +1,5 @@
 package chat.client.controller;
 
-import chat.client.mocks.MockMessageListener;
 import chat.client.mocks.MockServer;
 import chat.client.scene.SceneManager;
 import chat.client.services.ChatService;
@@ -27,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class ChatroomControllerTest extends ApplicationTest {
 
@@ -64,8 +62,9 @@ public class ChatroomControllerTest extends ApplicationTest {
         serverThread.start();
 
         // Let it sleep for 1 second to ensure thread executed
-        WaitForAsyncUtils.sleep(1000, TimeUnit.MILLISECONDS);
+        WaitForAsyncUtils.sleep(2000, TimeUnit.MILLISECONDS);
         chatService = new ChatService(HOSTNAME, serverPort);
+        Semaphore semaphore = new Semaphore(0);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -75,10 +74,14 @@ public class ChatroomControllerTest extends ApplicationTest {
                 clickOn("#usernameInput");
                 write(username);
                 clickOn("#btnLogin");
+                semaphore.release();
             }
         });
+        semaphore.acquire();
+
         // Capture all events that are queued as of now.
         WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.sleep(5000, TimeUnit.MILLISECONDS);
 
         // Simulate server response
         mockServer.sendMessage("OK IDEN Welcome to the chat server " + username);
@@ -100,6 +103,7 @@ public class ChatroomControllerTest extends ApplicationTest {
             e.printStackTrace();
         }
         WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.sleep(500, TimeUnit.MILLISECONDS);
     }
 
     @Test

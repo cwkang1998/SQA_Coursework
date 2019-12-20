@@ -41,7 +41,7 @@ public class ChatService implements Runnable {
     public void registerUser(String username) {
         if (!username.isEmpty()) {
             this.username = username.split(" ")[0];
-            this.writer.println("IDEN " + username);
+            this.writer.println("IDEN " + this.username);
         }
     }
 
