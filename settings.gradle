@@ -1,3 +1,2 @@
-
 rootProject.name = 'coursework'
-include ':chat-server' ,':chat-client'
+include ':chat-server', ':chat-client'
