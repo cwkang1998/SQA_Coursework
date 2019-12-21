@@ -36,8 +36,8 @@ public class ChatroomController extends BaseController {
     private TextArea msgTextArea;
 
     private volatile HashMap<String, VBox> chatRoomContent;
-    private volatile boolean isPolling;
-    private volatile String currentChatroom;
+    private boolean isPolling;
+    private String currentChatroom;
 
     private Thread pollingThread;
     private final String PUBLIC_CHAT_NAME = "Public Chatroom";
@@ -98,16 +98,18 @@ public class ChatroomController extends BaseController {
                 if (error) {
                     newMsg.setTextFill(Color.web("#FF3232"));
                 }
-                VBox chatBox = chatRoomContent.get(user);
-                chatBox.getChildren().add(newMsg);
-                chatBox.heightProperty().addListener(new InvalidationListener() {
-                    @Override
-                    public void invalidated(Observable observable) {
-                        if (currentChatroom.equals(user)) {
-                            chatScroll.setVvalue(1.0);
+                synchronized (ChatroomController.this) {
+                    VBox chatBox = chatRoomContent.get(user);
+                    chatBox.getChildren().add(newMsg);
+                    chatBox.heightProperty().addListener(new InvalidationListener() {
+                        @Override
+                        public void invalidated(Observable observable) {
+                            if (currentChatroom.equals(user)) {
+                                chatScroll.setVvalue(1.0);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         });
     }
@@ -130,12 +132,23 @@ public class ChatroomController extends BaseController {
         pollingThread.start();
     }
 
-    private void populateOnlineUsers(ArrayList<String> users) {
+    private synchronized void populateOnlineUsers(ArrayList<String> users) {
         if (users.size() + 1 != chatRoomContent.size()) {
             for (String currentUser : chatRoomContent.keySet()) {
                 if (!users.contains(currentUser) && !currentUser.equals(PUBLIC_CHAT_NAME)) {
                     chatRoomContent.remove(currentUser);
                 }
+            }
+            if (!chatRoomContent.containsKey(currentChatroom)) {
+                currentChatroom = PUBLIC_CHAT_NAME;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (ChatroomController.this) {
+                            chatScroll.setContent(chatRoomContent.get(currentChatroom));
+                        }
+                    }
+                });
             }
         }
         for (String user : users) {
@@ -160,9 +173,11 @@ public class ChatroomController extends BaseController {
                             public void handle(ActionEvent event) {
                                 currentChatroom = user;
                                 userLink.setVisited(true);
-                                chatScroll.setContent(chatRoomContent.get(user));
-                                chatScroll.setVvalue(1.0);
-                                populateOnlineUsers(users);
+                                synchronized (ChatroomController.this) {
+                                    chatScroll.setContent(chatRoomContent.get(user));
+                                    chatScroll.setVvalue(1.0);
+                                    populateOnlineUsers(users);
+                                }
                             }
                         });
                         if (currentChatroom.equals(user)) {
@@ -181,9 +196,11 @@ public class ChatroomController extends BaseController {
                     public void handle(ActionEvent event) {
                         currentChatroom = PUBLIC_CHAT_NAME;
                         publicRoomLink.setVisited(true);
-                        chatScroll.setContent(chatRoomContent.get(PUBLIC_CHAT_NAME));
-                        chatScroll.setVvalue(1.0);
-                        populateOnlineUsers(users);
+                        synchronized (ChatroomController.this) {
+                            chatScroll.setContent(chatRoomContent.get(PUBLIC_CHAT_NAME));
+                            chatScroll.setVvalue(1.0);
+                            populateOnlineUsers(users);
+                        }
                     }
                 });
                 if (currentChatroom.equals(PUBLIC_CHAT_NAME)) {
